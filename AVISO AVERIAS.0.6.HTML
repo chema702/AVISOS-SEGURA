@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- ETIQUETAS PARA QUE FUNCIONE COMO APP EN EL MÓVIL -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Aviso: Trabajo / Avería</title>
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 10px auto; padding: 15px; background: #f4f4f9; -webkit-text-size-adjust: 100%; }
+        .form-group { margin-bottom: 12px; }
+        .grid-address { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; text-transform: uppercase; -webkit-appearance: none; appearance: none; }
+        select#prioridad.urgente { background-color: #ffe6e6; color: #d9534f; font-weight: bold; border-color: #d9534f; }
+        textarea { height: 120px; resize: vertical; text-transform: uppercase; }
+        hr { border: 0; border-top: 1px solid #ccc; margin: 20px 0; }
+        
+        /* BOTÓN UNIFICADO ESTILO APP */
+        button.btn-unified { 
+            width: 100%; padding: 16px; color: white; border: none; border-radius: 12px; 
+            font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 18px; 
+            display: flex; align-items: center; justify-content: center; gap: 10px; 
+            background: linear-gradient(135deg, #0078d4 0%, #25d366 100%);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+        button.btn-unified:active { transform: scale(0.98); }
+        button.btn-unified svg { width: 24px; height: 24px; fill: currentColor; }
+        
+        input.valido { border-color: #28a745; background-color: #f8fff9; }
+        input.invalido { border-color: #d9534f; background-color: #fff8f8; }
+        .error-msg { color: #d9534f; font-size: 12px; margin-top: 3px; display: none; }
+        .info-box { background-color: #e7f3ff; border-left: 4px solid #0078d4; padding: 10px; border-radius: 4px; font-size: 13px; margin-bottom: 15px; color: #005a9e; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center; color:#333;">Aviso: Trabajo / Avería</h2>
+    
+    <div class="info-box">
+        ℹ️ Al pulsar el botón, se abrirá primero su correo y después WhatsApp.
+    </div>
+    
+    <form id="avisoForm">
+        <div class="form-group">
+            <label>FECHA:</label>
+            <input type="date" id="fecha">
+        </div>
+        <div class="form-group">
+            <label>PRIORIDAD:</label>
+            <select id="prioridad" onchange="actualizarEstiloPrioridad()">
+                <option value="AVERIA">AVERIA</option>
+                <option value="URGENTE">URGENTE</option>
+                <option value="TRABAJO">TRABAJO</option>
+                <option value="PRESUPUESTO">PRESUPUESTO</option>
+            </select>
+        </div>
+        
+        <hr>
+        
+        <div class="form-group">
+            <label>NOMBRE / SOCIEDAD:</label>
+            <input type="text" id="cliente" required>
+        </div>
+        <div class="form-group">
+            <label>DNI / CIF / NIE:</label>
+            <input type="text" id="dnicif" oninput="validarDniCifNie(this)" required placeholder="Ingrese DNI, CIF o NIE">
+            <div id="error-dnicif" class="error-msg">Identificador no válido.</div>
+        </div>
+        <div class="form-group">
+            <label>TELÉFONO:</label>
+            <input type="tel" id="tel" oninput="validarTelefono(this)" required placeholder="9 dígitos" maxlength="9" inputmode="numeric">
+            <div id="error-tel" class="error-msg">El teléfono debe tener 9 cifras.</div>
+        </div>
+        <div class="form-group">
+            <label>CORREO CLIENTE:</label>
+            <input type="email" id="correo">
+        </div>
+
+        <div class="form-group">
+            <label>DIRECCIÓN CLIENTE:</label>
+            <input type="text" id="dir_c" oninput="sincronizar()" required placeholder="Calle / Avda">
+            <div class="grid-address" style="margin-top:5px;">
+                <input type="text" id="num_c" oninput="sincronizar()" required placeholder="Nº">
+                <input type="text" id="cp_c" oninput="sincronizar()" placeholder="C.Postal" inputmode="numeric">
+                <input type="text" id="pob_c" oninput="sincronizar()" required placeholder="Población">
+            </div>
+            <input type="text" id="prov_c" oninput="sincronizar()" required placeholder="Provincia" style="margin-top:5px;">
+        </div>
+
+        <hr>
+
+        <div class="form-group">
+            <label>DIRECCIÓN DE OBRA:</label>
+            <input type="text" id="dir_o" oninput="activarEdicionObra()" required placeholder="Calle / Avda">
+            <div class="grid-address" style="margin-top:5px;">
+                <input type="text" id="num_o" oninput="activarEdicionObra()" required placeholder="Nº">
+                <input type="text" id="cp_o" oninput="activarEdicionObra()" placeholder="C.Postal" inputmode="numeric">
+                <input type="text" id="pob_o" oninput="activarEdicionObra()" required placeholder="Población">
+            </div>
+            <input type="text" id="prov_o" oninput="activarEdicionObra()" required placeholder="Provincia" style="margin-top:5px;">
+        </div>
+
+        <div class="form-group">
+            <label>DESCRIPCIÓN:</label>
+            <textarea id="desc" required></textarea>
+        </div>
+
+        <!-- BOTÓN UNIFICADO -->
+        <button type="button" class="btn-unified" onclick="enviarTodo()">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <span>ENVIAR CORREO Y WHATSAPP</span>
+        </button>
+    </form>
+
+    <script>
+        document.getElementById('fecha').valueAsDate = new Date();
+        let obraEditadaManualmente = false;
+
+        // MAYÚSCULAS AUTOMÁTICAS
+        document.querySelectorAll('input[type="text"], textarea').forEach(input => {
+            input.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+        });
+
+        function actualizarEstiloPrioridad() {
+            document.getElementById('prioridad').className = document.getElementById('prioridad').value === 'URGENTE' ? 'urgente' : '';
+        }
+
+        function validarTelefono(input) {
+            let v = input.value.trim(), err = document.getElementById('error-tel');
+            if (/^\d{9}$/.test(v)) { input.classList.add('valido'); input.classList.remove('invalido'); err.style.display='none'; return true; }
+            else { input.classList.add('invalido'); input.classList.remove('valido'); err.style.display='block'; return false; }
+        }
+
+        function validarDniCifNie(input) {
+            let v = input.value.trim().toUpperCase(), err = document.getElementById('error-dnicif');
+            if (!v) { input.classList.remove('valido','invalido'); err.style.display='none'; return false; }
+            let ok = false;
+            if (/^[0-9]{8}[A-Z]$/.test(v)) ok = "TRWAGMYFPDXBNJZSQVHLCKE"[parseInt(v.substr(0,8),10)%23] === v[8];
+            else if (/^[XYZ][0-9]{7}[A-Z]$/.test(v)) { let r={'X':'0','Y':'1','Z':'2'}[v[0]]; ok = "TRWAGMYFPDXBNJZSQVHLCKE"[parseInt(r+v.substr(1,7),10)%23] === v[8]; }
+            else if (/^[ABCDEFGHJKLMNPQRSUVW][0-9]{7}[0-9A-J]$/.test(v)) ok = true; 
+            
+            if (ok) { input.classList.add('valido'); input.classList.remove('invalido'); err.style.display='none'; return true; }
+            else { input.classList.add('invalido'); input.classList.remove('valido'); err.style.display='block'; return false; }
+        }
+
+        function sincronizar() {
+            if (!obraEditadaManualmente) {
+                ['dir','num','cp','pob','prov'].forEach(c => document.getElementById(c+'_o').value = document.getElementById(c+'_c').value);
+            }
+        }
+        function activarEdicionObra() { obraEditadaManualmente = true; }
+
+        function val(id) { let v = document.getElementById(id).value.trim().toUpperCase(); return v || "S/N"; }
+
+        function generarMensaje() {
+            let p = val('prioridad'), pt = p==='URGENTE'?'🚨 *URGENTE* 🚨':p;
+            let dirO = `${val('dir_o')}, ${val('num_o')}, ${val('cp_o')} ${val('pob_o')} (${val('prov_o')})`;
+            let maps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(dirO);
+            return `️ FECHA: ${val('fecha')}\n🚨 PRIORIDAD: ${pt}\n----------------------------\n👤 CLIENTE: ${val('cliente')}\n🆔 DNI/CIF: ${val('dnicif')}\n📞 TEL: ${val('tel')}\n📍 DIR. CLIENTE:\n${val('dir_c')}\n${val('num_c')}\n${val('cp_c')}\n${val('pob_c')}\n${val('prov_c')}\n\n${maps}\n\n🏗️ DIR. OBRA:\n${dirO}\n----------------------------\n📝 DESCRIPCIÓN:\n${val('desc')}`;
+        }
+
+        function enviarTodo() {
+            if(!validarDniCifNie(document.getElementById('dnicif')) || !validarTelefono(document.getElementById('tel'))) {
+                alert("⚠️ Revise DNI y Teléfono antes de enviar."); return;
+            }
+
+            let msg = generarMensaje();
+            let asunto = encodeURIComponent("AVISO: " + val('cliente'));
+            
+            // 1. PRIMERO EL CORREO (Usando window.location para máxima compatibilidad iOS)
+            window.location.href = `mailto:patricia.vargas@INSTALACIONESSEGURA.ES?subject=${asunto}&body=${encodeURIComponent(msg)}`;
+
+            // 2. DESPUÉS WHATSAPP CON RETRASO DE 800ms (Para evitar bloqueo en móviles)
+            setTimeout(() => {
+                window.open(`https://api.whatsapp.com/send?phone=34610380081&text=${encodeURIComponent(msg)}`, '_blank');
+            }, 800);
+        }
+    </script>
+</body>
+</html>
