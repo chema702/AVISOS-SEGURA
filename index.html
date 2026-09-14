@@ -1,8 +1,8 @@
 <!--
-    * Descripción general: Formulario web optimizado como aplicación móvil/escritorio para la generación y envío rápido de avisos de trabajo o averías mediante correo electrónico (mailto) y WhatsApp.
-    * Propósito principal: Estandarizar la recogida de datos de clientes, direcciones de obra y descripciones técnicas, asegurando validaciones de campos críticos antes de enviarlos por separado.
-    * Explicación de la lógica clave: El script valida los campos de DNI/CIF/NIE y teléfono en tiempo real. Al pulsar los botones independientes, se comprueba la validez y se genera un mensaje formateado. El envío de WhatsApp utiliza la estructura "wa.me" para intentar reutilizar la sesión y ventana activa actual.
-    * Notas importantes y dependencias: Diseñado para ejecutarse en navegadores modernos. No requiere librerías externas. Las acciones de correo dependen del cliente de correo predeterminado y WhatsApp Web de la sesión activa en el navegador.
+    * Descripción general del funcionamiento del script: Formulario web optimizado como aplicación móvil/escritorio para la generación y envío rápido de avisos de trabajo o averías mediante correo electrónico (mailto) y WhatsApp de forma independiente.
+    * Propósito principal y objetivo: Estandarizar la recogida de datos de clientes, direcciones de obra y descripciones técnicas, asegurando validaciones de campos críticos antes de enviarlos.
+    * Explicación de la lógica clave: El script valida los campos de DNI/CIF/NIE y teléfono en tiempo real. Al pulsar los botones independientes, comprueba la validez y abre el correo predeterminado o un enlace de WhatsApp con los datos formateados.
+    * Notas importantes sobre su uso o dependencias: Diseñado para ejecutarse en navegadores modernos sin librerías externas. Depende de las aplicaciones de correo configuradas en el equipo y de WhatsApp Web en el navegador.
 -->
 <!DOCTYPE html>
 <html lang="es">
@@ -197,7 +197,7 @@
         function enviarWhatsapp() {
             if (!validarFormulario()) return;
             let msg = generarMensaje();
-            window.location.href = `https://wa.me/34610380081?text=${encodeURIComponent(msg)}`;
+            window.open(`https://api.whatsapp.com/send?phone=34610380081&text=${encodeURIComponent(msg)}`, '_blank');
         }
     </script>
 </body>
